@@ -1,6 +1,7 @@
+---
 name: toml
 description: Generates structured TOML documentation that mirrors a codebase's architecture for AI agent consumption. Use when the user asks to "document my project for AI", "generate TOML files", "create metadata for my components", "index my codebase", "map out my architecture", "prepare documentation for an AI agent", or wants to create a lightweight structural reference of their repository. Supports React/TypeScript/JavaScript projects with components, pages, hooks, and utilities.
-
+---
 # TOML Documentation Generator Skill
 
 **Skill Name:** toml
