@@ -1,9 +1,9 @@
-name: toml-docs
-description: Generates structured TOML documentation that mirrors a codebase's architecture for AI agent consumption.
+name: toml
+description: Generates structured TOML documentation that mirrors a codebase's architecture for AI agent consumption. Use when the user asks to "document my project for AI", "generate TOML files", "create metadata for my components", "index my codebase", "map out my architecture", "prepare documentation for an AI agent", or wants to create a lightweight structural reference of their repository. Supports React/TypeScript/JavaScript projects with components, pages, hooks, and utilities.
 
 # TOML Documentation Generator Skill
 
-**Skill Name:** toml-docs  
+**Skill Name:** toml
 **Version:** 1.0.0  
 **Author:** Custom Skill  
 **Category:** Documentation, Code Analysis, AI Tools
@@ -18,7 +18,7 @@ Generates structured TOML documentation that mirrors a codebase's architecture f
 
 ## Overview
 
-Transform source code into structured, AI-readable TOML documentation. This skill creates a `toml_docs/` directory that mirrors your project structure with semantic metadata files designed for AI agent comprehension.
+Transform source code into structured, AI-readable TOML documentation. This skill creates a `toml/` directory that mirrors your project structure with semantic metadata files designed for AI agent comprehension.
 
 ---
 
@@ -37,12 +37,12 @@ For each code file, extract:
 - **Usage Context**: Where it fits in the architecture
 
 **Step 3: Generate TOML Files**
-Create mirrored `toml_docs/` structure with one `.toml` file per source file.
+Create mirrored `toml/` structure with one `.toml` file per source file.
 
 Example mapping:
 ```
 src/components/auth/LoginForm.tsx
-  → toml_docs/components/auth/LoginForm.toml
+  → toml/components/auth/LoginForm.toml
 ```
 
 ---
@@ -147,7 +147,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ userId, variant = 'ful
 }
 ```
 
-### Generated TOML: `toml_docs/components/user/ProfileCard.toml`
+### Generated TOML: `toml/components/user/ProfileCard.toml`
 
 ```toml
 [metadata]
@@ -188,9 +188,9 @@ When user triggers this skill:
 1. Ask: "Which directory should I document?" (default: `src/`)
 2. Scan and build file tree
 3. Process files in logical order (utilities → hooks → components → pages)
-4. Create mirrored `toml_docs/` structure as you go
+4. Create mirrored `toml/` structure as you go
 5. Report progress every 10 files
-6. Generate summary: `toml_docs/INDEX.md` listing all documented files with their types
+6. Generate summary: `toml/INDEX.md` listing all documented files with their types
 
 **For large projects (50+ files):**
 - Process in batches of 20 files
@@ -208,7 +208,7 @@ A well-documented project enables an AI agent to:
 - Generate new components that match existing patterns
 - Refactor code with full awareness of architectural relationships
 
-The `toml_docs/` directory becomes the "DNA map" of the project - a complete semantic index optimized for AI comprehension.
+The `toml/` directory becomes the "DNA map" of the project - a complete semantic index optimized for AI comprehension.
 
 ---
 
@@ -516,7 +516,7 @@ if __name__ == '__main__':
 
 **Usage:**
 ```bash
-python generate_toml.py src/ toml_docs/
+python generate_toml.py src/ toml/
 ```
 
 ---
@@ -588,7 +588,7 @@ interface ButtonProps {
 }
 ```
 
-**TOML:** `toml_docs/components/ui/Button.toml`
+**TOML:** `toml/components/ui/Button.toml`
 ```toml
 [metadata]
 name = "Button"
@@ -621,7 +621,7 @@ export function useUser(userId: string) {
 }
 ```
 
-**TOML:** `toml_docs/hooks/useUser.toml`
+**TOML:** `toml/hooks/useUser.toml`
 ```toml
 [metadata]
 name = "useUser"
@@ -656,7 +656,7 @@ export function formatDate(date: Date | string, format: 'short' | 'long' = 'shor
 }
 ```
 
-**TOML:** `toml_docs/utils/formatDate.toml`
+**TOML:** `toml/utils/formatDate.toml`
 ```toml
 [metadata]
 name = "formatDate"
@@ -688,7 +688,7 @@ error_handling = "Throws on invalid date strings. Wrap in try-catch or validate 
 2. **Use the Script** - Let automation handle the tedious extraction, then enhance manually
 3. **Focus on "Why"** - Don't just describe what code does, explain why it exists
 4. **Think Like an Agent** - What would another AI need to know to use/modify this code?
-5. **Maintain Hierarchy** - Always preserve the exact folder structure from `src/` to `toml_docs/`
+5. **Maintain Hierarchy** - Always preserve the exact folder structure from `src/` to `toml/`
 6. **Iterate** - Review generated docs after using them once, refine based on usefulness
 
 ---
