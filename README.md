@@ -14,11 +14,7 @@ Your original skill concept was excellent! I've transformed it into a production
 The description field is critical—it's how Claude knows when to use your skill. I made it comprehensive:
 
 ```yaml
-description: Generates structured TOML documentation that mirrors a codebase's 
-architecture for AI agent consumption. Use when the user asks to "document my 
-project for AI", "generate TOML files", "create metadata for my components", 
-"index my codebase", "map out my architecture", "prepare documentation for 
-an AI agent"...
+description: Generates structured TOML documentation that mirrors a codebase's architecture for AI agent consumption. Use when the user asks to "document my project for AI", "generate TOML files", "create metadata for my components", "index my codebase", "map out my architecture", "prepare documentation for an AI agent"...
 ```
 
 This ensures the skill triggers on all relevant user requests.
