@@ -1,3 +1,6 @@
+name: toml-docs
+description: Generates structured TOML documentation that mirrors a codebase's architecture for AI agent consumption.
+
 # TOML Documentation Generator Skill
 
 **Skill Name:** toml-docs  
