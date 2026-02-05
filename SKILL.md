@@ -1,296 +1,134 @@
 ---
 name: toml
-description: "Generates structured TOML documentation that mirrors an entire codebase's architecture for AI agent consumption. Optimized to reduce token usage in future sessions by relying on generated TOML (toml/**) as the primary knowledge source. Supports JavaScript/TypeScript and React (JSX/TSX), including shared libraries and API-client code."
+description: "Universal TOML documentation generator core. Detects repo language/framework, routes to matching reference rules, and maintains an up-to-date toml/ architecture mirror with incremental updates."
+version: 1.2.0
+category: Documentation, Code Analysis, AI Tools
 ---
 
-# TOML Documentation Generator Skill
+# TOML Generator — Core Skill (Detect → Route → Mirror Updates)
 
-**Skill Name:** toml  
-**Version:** 1.1.0  
-**Author:** Custom Skill  
-**Category:** Documentation, Code Analysis, AI Tools
+> Design happens during REFACTORING, not during coding.
+> See: references/tdd.md
 
----
+## What this skill MUST do
 
-## Description
-
-Generates structured TOML documentation that mirrors a repository’s architecture for AI agent consumption. Use when the user asks to:
-
-- "document my project for AI"
-- "generate TOML files"
-- "create metadata for my components"
-- "index my codebase"
-- "map out my architecture"
-- "prepare documentation for an AI agent"
-
-**Primary goal:** create a durable `toml/` knowledge base so future requests can be answered using TOML instead of re-reading source files (token-saving).
+1) Detect the project language(s) and framework(s).
+2) Route to the correct rule references in `references/**`.
+3) Generate and maintain a `toml/` folder that mirrors architecture.
+4) On changes: incrementally update only impacted TOML files and indexes.
 
 ---
 
-## No Runtime Requirements
+## Step 0 — Always start from TOML first (token efficiency)
 
-This skill does **not** require Python or any extra runtime.  
-It is instruction-based: the agent reads source files (when needed) and writes TOML outputs.
-
----
-
-## Overview
-
-Transform source code into structured, AI-readable TOML documentation. This skill creates a `toml/` directory that mirrors your project structure with semantic metadata files designed for AI agent comprehension.
+On follow-ups:
+- Read `toml/INDEX.toml` first.
+- Then read relevant `toml/**/*.toml`.
+  Only open source files if TOML is missing/outdated or user explicitly asks.
 
 ---
 
-## Default Scope (IMPORTANT)
+## Step 1 — Detect language & framework (MANDATORY)
 
-- Default to scanning the **repository root (`.`)**, not only `src/`.
-- If `src/` exists, prioritize it **but do not ignore** other top-level folders like:
-    - `shared/`, `lib/`, `libs/`, `packages/`, `apps/`, `server/`, `api/`, `services/`, `utils/`, `scripts/`
-- **Never** skip a folder solely because it is named `api`.
+High-confidence signals:
+- JS/TS: `package.json` exists and `.js/.jsx/.ts/.tsx` files exist
+- TS: `tsconfig.json` OR `typescript` in deps/devDeps
+- React: `react` in deps OR `.jsx/.tsx` usage
+- Next.js: `next` in deps OR `/app` or `/pages` with Next conventions
+- Node server: `express|fastify|koa|hapi|nest` in deps OR server folder patterns
 
----
-
-## Token Efficiency Rules (MUST FOLLOW)
-
-1) On follow-up requests, read `toml/INDEX.md` (and/or `toml/INDEX.toml`) and relevant `toml/**/*.toml` first.
-2) Only open source files if TOML is missing, clearly outdated, or the user explicitly requests code inspection.
-3) If updating, regenerate TOML **only for affected files**, not the whole repo.
-4) Prefer short, high-signal summaries in TOML to reduce future token usage.
+See:
+- references/routing.md
+- references/javascript/detect.md
+- references/typescript/detect.md
 
 ---
 
-## Core Workflow
+## Step 2 — Route to ruleset (MANDATORY)
 
-### Step 1: Analyze Project Structure
-- Scan repository root (`.`) unless the user specifies a subdirectory
-- Build a file tree of candidate source files
-- Identify file categories:
-    - **components** (React components)
-    - **pages/routes** (app/page routing)
-    - **hooks** (use*)
-    - **utilities** (pure helpers)
-    - **types** (types/interfaces)
-    - **api/service clients** (fetch/axios clients, request builders)
-    - **state/store** (Redux/Zustand/etc.)
-    - **configs** (only include if they contain runtime logic)
+Select exactly one primary ruleset + optional sub-rules:
 
-### Step 2: Process Each File
-For each relevant file, extract:
-- **Intent**: what problem it solves (WHAT + WHY)
-- **Interface**: props/params/returns/events
-- **Dependencies**: internal + external
-- **Usage Context**: where it sits in architecture and constraints
+- If `typescript` + `react`:
+  - See: references/typescript/react.md
+  - See: references/typescript/extraction.md
+- If `javascript` + `react`:
+  - See: references/javascript/react.md
+  - See: references/javascript/extraction.md
 
-### Step 3: Generate TOML Files (Mirror Hierarchy)
-- Output folder: `toml/`
-- For each source file `path/to/File.ext`, write:
-    - `toml/path/to/File.toml` (replace extension with `.toml`)
-- Preserve the exact folder structure.
+Optional add-ons:
+- If `nextjs` detected:
+  - See: references/typescript/nextjs.md OR references/javascript/nextjs.md
+- If `node` server detected:
+  - See: references/typescript/node.md OR references/javascript/node.md
 
-Example mapping:
-```
-src/components/auth/LoginForm.jsx
-  → toml/src/components/auth/LoginForm.toml
-
-shared/api/httpClient.js
-  → toml/shared/api/httpClient.toml
-```
+See:
+- references/routing.md
 
 ---
 
-## JS / JSX / TS / TSX Classification Rules (IMPORTANT)
+## Step 3 — Generate/Update TOML mirror (MANDATORY)
 
-### React Components
-Classify as `type="component"` if file (usually `.jsx` or `.tsx`) exports a React component, e.g.:
-- `export default function ComponentName() { return (...) }`
-- `export function ComponentName() { return (...) }`
-- `const ComponentName = (...) => (...)`
-- `React.FC<...>` patterns
+Mapping:
+`path/to/File.ext` → `toml/path/to/File.toml` (preserve folders exactly)
 
-### Pages / Routes
-Classify as `type="page"` when component represents a route/page:
-- file lives under `/pages/`, `/app/`, `/routes/`
-- or uses router conventions of your framework
+Every TOML file MUST include:
+- `[metadata]`
+- `[properties]`
+- `[context]`
 
-### Hooks
-Classify as `type="hook"` when:
-- filename starts with `use` (e.g., `useUser.ts`)
-- returns an object/tuple and uses React hooks inside
-
-### API Clients / Services (MUST INCLUDE, especially under shared/api)
-Classify as `type="api_client"` or `type="service"` when file:
-- uses `fetch`, `axios`, `ky`, `graphql-request`, `Apollo`, etc.
-- builds request/response shapes
-- exports functions like `getUser`, `createOrder`, `fetchSomething`
-
-### Utilities
-Classify as `type="utility"` for:
-- pure functions, formatters, validators, mappers
-
-### Types
-Classify as `type="types"` for:
-- `.d.ts`
-- `types.ts`, `*.types.ts`
-- files exporting interfaces/types
+See:
+- references/index-format.md
 
 ---
 
-## TOML Structure Requirements (MANDATORY)
+## Step 4 — Incremental updates on code changes (MANDATORY)
 
-Every TOML file MUST include these tables:
+Change scenarios:
+1) Modified → regenerate that file’s TOML
+2) Added → create TOML + update indexes
+3) Deleted → remove TOML + update indexes
+4) Renamed/moved → move TOML mirror + update indexes
 
-### 1) `[metadata]`
-```toml
-[metadata]
-name = "EntityName"
-type = "component|page|hook|utility|types|service|api_client|store|config"
-path = "relative/path/to/file"
-description = "1-2 sentences describing functional intent (WHAT + WHY)."
-```
+Outdated if:
+- TOML missing OR
+- `metadata.source.generated_at` older than last known change OR
+- `metadata.source.source_hash` mismatches (if used)
 
-Optional (recommended for update detection):
-```toml
-[metadata.source]
-generated_at = "YYYY-MM-DD"
-# source_hash = "optional"
-```
-
-### 2) `[properties]` (interface contract)
-**Components**: document props  
-**Utilities**: document parameters  
-**API clients/services**: document public functions and inputs
-```toml
-[properties]
-paramOrProp = { type = "string|number|boolean|object|function|enum", required = true, default = "value", description = "Impact on behavior" }
-```
-
-Hooks MUST include return values:
-```toml
-[properties.return]
-data = { type = "unknown", description = "Returned data" }
-loading = { type = "boolean", description = "Request in-flight status" }
-```
-
-Utilities should include return meaning too:
-```toml
-[properties.return]
-result = { type = "unknown", description = "Return value meaning" }
-```
-
-Multiple exports:
-```toml
-[properties.exports]
-SomeExport = { type = "function|object|type|component", description = "What it is and why it exists" }
-```
-
-### 3) `[context]` (architectural positioning)
-```toml
-[context]
-state_management = "How state is managed (local, context, store, caching, etc.)"
-dependencies = ["InternalModuleOrComponent", "externalLibrary"]
-usage_guideline = "Where/how to use; required preconditions"
-architectural_role = "presentation|routing|business_logic|data_access|integration|infrastructure"
-```
-
-Optional but recommended fields (use underscore names):
-- `performance_notes`
-- `error_handling`
-- `security_notes` (especially for api clients)
-- `caching_behavior`
-- `testing_notes`
+See:
+- references/diff-update.md
 
 ---
 
-## File Processing Rules
+## Step 5 — Indexes must stay in sync
 
-### Include
-- `.ts`, `.tsx`, `.js`, `.jsx` files containing logic
-- `shared/**` including **`shared/api/**`**
-- API client/service files (fetch/axios/graphql)
-- stores/state files (redux/zustand/mobx)
-- route/page definitions with logic
+Maintain:
+- `toml/INDEX.md`
+- `toml/INDEX.toml`
 
-### Exclude (minimal)
-- `node_modules/`, `.git/`
-- build outputs: `dist/`, `build/`, `.next/`, `out/`, `coverage/`
-- assets: `.png`, `.jpg`, `.svg`, `.webp`, `.ico`
-- styles only: `.css`, `.scss`, `.module.css`
-- tests: `.test.*`, `.spec.*`, `__tests__/`
-
-### Special Cases
-- `index.ts` barrel exports: exclude unless they contain real logic
-- configs: include only if they contain runtime logic used by app; otherwise exclude
+See:
+- references/index-format.md
 
 ---
 
-## Quality Standards
+## Default scope rules
 
-- Avoid generic descriptions
-- Explain WHY it exists and where it belongs architecturally
-- Do NOT include source code in TOML
-- Preserve folder structure exactly
-- Do NOT skip `[context]`
+Default scan: `.`. Prioritize `src/` but include other top-level folders:
+`shared/ lib/ libs/ packages/ apps/ server/ api/ services/ utils/ scripts/`
 
----
+Never skip solely because folder is named `api`.
 
-## Required Outputs
-
-### 1) `toml/INDEX.md`
-- List all documented files with:
-    - type
-    - 1-line summary
-    - link/path to TOML file
-
-### 2) `toml/INDEX.toml` (token saver)
-Machine-friendly manifest mapping source → TOML file:
-
-```toml
-[repo]
-root = "."
-generated_at = "YYYY-MM-DD"
-
-[[files]]
-path = "shared/api/httpClient.js"
-toml = "toml/shared/api/httpClient.toml"
-type = "api_client"
-summary = "HTTP client wrapper for authenticated requests with retry/error normalization."
-```
+Exclude:
+`node_modules/ .git/ dist/ build/ .next/ out/ coverage/`
+assets, style-only files, tests.
 
 ---
 
-## Execution Strategy
+## Non-negotiables
 
-When user triggers this skill:
+- Never include source code in TOML.
+- Never flatten hierarchy.
+- Avoid trivial descriptions; focus on WHAT + WHY + interface + architectural role.
+- Never skip `[context]`.
 
-1) Ask: "Scan entire repo (`.`) or a specific directory?" Default: **entire repo**.
-2) Build file tree; show top-level folders detected
-3) Process files in order:
-    - utilities/services/api clients → stores → hooks → components → pages/routes
-4) Create mirrored `toml/` structure while processing
-5) Report progress every ~20 files (or per folder)
-6) Generate `toml/INDEX.md` + `toml/INDEX.toml`
-
-For large projects:
-- Process in batches
-- Allow user to include/exclude subdirectories (but default is entire repo)
-
----
-
-## Anti-Patterns to Avoid
-
-1) Never include source code in TOML files
-2) Never flatten hierarchy — preserve exact folder structure
-3) Never generate trivial descriptions
-4) Never document deep implementation details — focus on intent + interface + context
-5) Never skip the `[context]` table
-
----
-
-## Success Criteria
-
-A well-documented project enables an AI agent to:
-- understand architecture without re-reading source
-- locate relevant files via `toml/INDEX.*`
-- update only impacted areas
-- reduce token usage by relying primarily on TOML docs
-
-The `toml/` directory becomes the repo’s "DNA map" optimized for AI comprehension.
+> Design happens during REFACTORING, not during coding.
+> See: references/tdd.md
